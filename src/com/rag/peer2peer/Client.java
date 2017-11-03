@@ -38,10 +38,10 @@ public class Client {
             }
         }
 
-
+        Random random = new Random();
         for(int i=0; i<n;i++){
             ArrayList<String> bookIndexes = new ArrayList<>();
-            Random random = new Random();
+            //Random random = new Random();
             for(int j=0; j< 5;j++){
                 String temp = "book"+random.nextInt(5)+""+random.nextInt(10);
                 if(!bookIndexes.contains(temp)){
@@ -127,7 +127,7 @@ public class Client {
                                     continue;
                                 }
 
-                                resultPeer = resultPeers.get(0);
+                                resultPeer = resultPeers.get(random.nextInt(resultPeers.size()));
                                 System.out.println("Book found and is at peer "+resultPeer);
                              }
                              break;
@@ -137,8 +137,15 @@ public class Client {
                                 continue;
                             }
 
-                            System.out.println("Downloading the file from the client "+resultPeer);
+                            System.out.println("Downloading the file from the "+resultPeer);
                             File source = new File("C:\\Users\\ragha\\Desktop\\Napster\\"+resultPeer+"\\"+searchBookName+".txt");
+                            if(!source.exists()){
+                                System.out.println("Sorry the file is not avaiable with the peer because peer is down!");
+                                int tempIndex = peerIndexes.get(resultPeer);
+                                peers.remove(tempIndex);
+                                peerIndexes.remove(tempIndex);
+                                break;
+                            }
                             File dest = new File("C:\\Users\\ragha\\Desktop\\Napster\\"+actPeer);
                             try {
                                 FileUtils.copyFileToDirectory(source, dest);
@@ -165,7 +172,9 @@ public class Client {
                             System.out.println("Thank you for . Going back to first option");
                             stayFlag = true;
                             break;
-
+                        default:
+                            System.out.println("Invalid Selection!");
+                            break;
                   }
 
                   if(stayFlag)
@@ -174,12 +183,52 @@ public class Client {
 
                 }
             }
+
+            System.out.println("Do you want to create a new node?(y/n)");
+            String temp2 = sc.nextLine().trim();
+            if(temp2.equals("y")){
+                System.out.println("Enter an id greater than "+n+":");
+                String newPeerId = sc.nextLine().trim();
+                peers.add("client"+newPeerId);
+                peerIndexes.put("client"+newPeerId, peers.size()-1);
+                success = (new File( "C:\\Users\\ragha\\Desktop\\Napster\\client"+newPeerId )).mkdirs();
+                if(!success){
+                    System.out.println("Folder not created");
+                    System.exit(0);
+                }
+                ArrayList<String> bookIndexes = new ArrayList<>();
+                //Random random = new Random();
+                for(int j=0; j< 5;j++){
+                    String temp = "book"+random.nextInt(5)+""+random.nextInt(10);
+                    if(!bookIndexes.contains(temp)){
+                        bookIndexes.add(temp);
+                        try{
+                            PrintWriter writer = new PrintWriter("C:\\Users\\ragha\\Desktop\\Napster\\client"+newPeerId+"\\"+temp+".txt");
+                            writer.append("This books is with client "+newPeerId+". And the book name is "+temp);
+                            writer.close();
+                        }catch(Exception ie){
+                            ie.printStackTrace();
+                        }
+
+                    }
+
+                }
+
+                //Register with server
+                String[] books = new String[bookIndexes.size()];
+                for(int j=0; j<bookIndexes.size();j++){
+                    books[j] = bookIndexes.get(j);
+                }
+                Server.register("client"+newPeerId,books);
+
+            }
             System.out.println("Do you want to exit?(y/n");
             String temp1 = sc.nextLine().trim();
             if(temp1.equals("y")){
                 System.out.println("Thank you!");
                  break;
             }
+
 
         }
         sc.close();
