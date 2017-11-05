@@ -113,6 +113,9 @@ public class Server {
             }
             if(peers.size() == 0){
                 System.out.println("No peers are available");
+                hIndex.remove(index);
+                centralIndex.remove(index);
+
                 return null;
             }
 
